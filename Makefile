@@ -26,27 +26,39 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Carlo Contavalli.
 
-TARGET = libyaarg.so.0.0.1
-LIB_COMPILE_FLAGS = -fPIC
-LIB_LINK_FLAGS = -shared -Wl,-soname,libyaarg.so.0
+STATIC_TARGET = libyaarg0.a
 
-CPPFLAGS = -Wall -pedantic -ggdb3 -O0 -DPRINT_DEBUG -Wformat-nonliteral -Wextra -Wstrict-overflow=5 -Wfloat-equal -Wconversion -Wlogical-op -fstack-protector-all -Wno-unused-parameter -fno-exceptions -std=c++0x $(LIB_COMPILE_FLAGS)
+DYNAMIC_TARGET = libyaarg0.so.0.0.1
+DYNAMIC_COMPILE_FLAGS = -fPIC
+DYNAMIC_LINK_FLAGS = -shared -Wl,-soname,libyaarg.so.0
+
+LDFLAGS = -lstdc++ -ggdb3 #-lduma -lm
+CPPFLAGS = -Wall -pedantic -ggdb3 -O0 -DPRINT_DEBUG -Wformat-nonliteral -Wextra -Wstrict-overflow=5 -Wfloat-equal -Wconversion -Wlogical-op -fstack-protector-all -Wno-unused-parameter -fno-exceptions -std=c++0x
 # CPPFLAGS = -Wall -pedantic -O0 -DPRINT_DEBUG
 # -Wunreachable-code -> causes lot of warnings due to standard libraries!
 # -Wformat-zero-length -> C and objective C only.
 # -Wshadow -> arguments like size and friends shadow globals :(
 # TRY USING mudflap library!
 
-LDFLAGS = -lstdc++ -ggdb3 $(LIB_LINK_FLAGS) #-lduma -lm
+all: dynamic
 
-all: $(TARGET)
+static: $(STATIC_TARGET)
+
+dynamic: LDFLAGS += $(DYNAMIC_LINK_FLAGS)
+dynamic: CPPFLAGS += $(DYNAMIC_COMPILE_FLAGS)
+dynamic: $(DYNAMIC_TARGET)
 
 config-parser-options.o: config-parser-options.cc
 config-parser.o: config-parser.cc
 config-parser-argv.o: config-parser-argv.cc
 
-$(TARGET): config-parser-options.o config-parser.o config-parser-argv.o 
-	$(CC) $(LDFLAGS) -o $(TARGET)
+DEPENDENCIES = config-parser-options.o config-parser.o config-parser-argv.o 
+
+$(DYNAMIC_TARGET): $(DEPENDENCIES)
+	$(CC) $(LDFLAGS) -o $(DYNAMIC_TARGET) $^
+
+$(STATIC_TARGET): $(DEPENDENCIES)
+	$(AR) rcs -o $(STATIC_TARGET) $^
 
 clean:
-	rm -f *.o *.so.*
+	rm -f *.o *.so.* *.a

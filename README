@@ -109,7 +109,9 @@ example. If you run:
 $ make
 
 on your linux system with gcc, you'll get a .so file for libyaarg,
-that you can then link with -lyaarg flags.
+eg, a dynamic library that you can then link with the -lyaarg flag.
+You can also use 'make static', to get a static .a library out
+instead.
 
 Again, this is just provided as an example, we might provide a
 configure and something fancier in the future.
