@@ -8,6 +8,21 @@ I wrote it after years of using getopt or other libraries, mostly
 to meet the needs of a few programs I'm working on.
 
 
+Where do I find it?
+===================
+
+libyaarg is currently hosted on github. You can find it here:
+
+   site: http://github.com/ccontavalli/libyaarg
+
+If you have issues with libyaarg, you should file bugs here:
+
+   http://github.com/ccontavalli/libyaarg/issues
+
+There currently is no mailing list, but don't be shy, email
+me if you have problems: <ccontavalli at inscatolati.net>.
+
+
 Why should I use libyaarg?
 ==========================
 
