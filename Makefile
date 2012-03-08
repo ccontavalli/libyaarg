@@ -32,6 +32,7 @@ DYNAMIC_TARGET = libyaarg0.so.0.0.1
 DYNAMIC_COMPILE_FLAGS = -fPIC
 DYNAMIC_LINK_FLAGS = -shared -Wl,-soname,libyaarg.so.0
 
+ALLSOURCES = *.cc
 LDFLAGS = -lstdc++ -ggdb3 #-lduma -lm
 CPPFLAGS = -Wall -pedantic -ggdb3 -O0 -DPRINT_DEBUG -Wformat-nonliteral -Wextra -Wstrict-overflow=5 -Wfloat-equal -Wconversion -Wlogical-op -fstack-protector-all -Wno-unused-parameter -fno-exceptions -std=c++0x
 # CPPFLAGS = -Wall -pedantic -O0 -DPRINT_DEBUG
@@ -40,7 +41,16 @@ CPPFLAGS = -Wall -pedantic -ggdb3 -O0 -DPRINT_DEBUG -Wformat-nonliteral -Wextra 
 # -Wshadow -> arguments like size and friends shadow globals :(
 # TRY USING mudflap library!
 
+.PHONY: all deps clean
+
 all: dynamic
+
+deps: Makefile.deps
+
+-include Makefile.deps
+
+Makefile.deps: Makefile
+	fastdep --extraremakedep=Makefile --remakedeptarget=Makefile.deps $(ALLSOURCES) > Makefile.deps
 
 static: $(STATIC_TARGET)
 
