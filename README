@@ -248,6 +248,10 @@ Finally, here's what your main will look like:
 |   // an 'HelpOption help(&parser, Option::Default, "doh", "g");' to
 |   // have the behavior of --help with --doh or -g, if you so desire.
 |   StandardOptions options(&parser);
+|   
+|   // This tells the parser about all the options Discover cares about.
+|   // Note that this has to happen before we start parsing.
+|   Discover discover(&parser); 
 | 
 |   // Now, let's rock: actually parse the command line. You can call
 |   // this multiple times, with different vectors. It's up to you.
@@ -273,7 +277,7 @@ Finally, here's what your main will look like:
 |   if (parser.ShouldExit()) {
 |     int exitstatus;
 |     // Meh, do we exit happily or angrily? what do we tell the OS?
-|     if (parser.HasErrors)
+|     if (parser.HasErrors())
 |       exitstatus = 1;
 |     else
 |       exitstatus = 0;
