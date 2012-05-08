@@ -43,8 +43,20 @@ class ConfigParserArgv : public ConfigParser {
   void DumpConfigs(int flags, ostream* stream) const;
   bool ShouldExit() const;
 
+  // When --help is invoked, determines how much space to keep
+  // between the option and the text.
+  // TODO: this could be determined automatically, we should still
+  // allow a manual override, though.
+  void SetOptionSpacing(int spacing);
+  // Sets the maximum line length to output with --help. Text will
+  // be wrapped at whitespace characters.
+  void SetLineLength(int length);
+
  private:
+  void PrintOptionDescription(Option* option, ostream* stream) const;
   void PrintOptionHelp(Option* option, ostream* stream) const;
+  void PrintOptionLine(const char* line, int length, ostream* stream) const;
+  void PrintFirstLine(const char* line, int length, ostream* stream) const;
 
   void ParseOption(
       const char* argument, deque<const char*>* argv);
@@ -59,6 +71,9 @@ class ConfigParserArgv : public ConfigParser {
 
   // How many characters before printing the help screen?
   int option_spacing_;
+  // Maximum length of line.
+  int line_length_;
+
   // Should the program exit or continue execution?
   bool should_continue_;
 };

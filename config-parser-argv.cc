@@ -35,6 +35,7 @@
 ConfigParserArgv::ConfigParserArgv(int flags, const char* description)
     : ConfigParser(flags, description),
       option_spacing_(12),
+      line_length_(80),
       should_continue_(true) {
 }
 
@@ -159,6 +160,57 @@ void ConfigParserArgv::GetHelp(string* str) const {
   // TODO
 }
 
+void ConfigParserArgv::PrintFirstLine(
+    const char* line, int length, ostream* stream) const {
+  stream->write(line, length);
+}
+
+void ConfigParserArgv::PrintOptionLine(
+    const char* line, int length, ostream* stream) const {
+  (*stream) << endl;
+  (*stream) << "      " << setw(option_spacing_) << " ";
+  (*stream) << " ";
+  stream->write(line, length);
+}
+
+void ConfigParserArgv::PrintOptionDescription(
+    Option* option, ostream* stream) const {
+  int maxlength = line_length_ - (option_spacing_ + 4 + 1);
+  const char* desc = option->GetDescription();
+  int desclength = strlen(desc);
+
+  int i = 0;
+  for (; desclength > maxlength; ++i) {
+    // Find the first space from where we are supposed to break the line.
+    const char* breakat = desc + maxlength;
+    for (; *breakat != ' ' && breakat > desc; --breakat)
+      ;
+
+    // If we did not find a space... not much we can do, just break the
+    // line where it happens to be. Note that if we found a space, we
+    // don't need to print that space.
+    int space = 1;
+    if (breakat == desc) {
+      breakat = desc + maxlength;
+      space = 0;
+    }
+
+    if (i == 0)
+      PrintFirstLine(desc, breakat - desc, stream);
+    else
+      PrintOptionLine(desc, breakat - desc, stream);
+
+    // Process what's left.
+    desclength = (desclength - (breakat - desc)) - space;
+    desc = breakat + space;
+  }
+
+  if (i == 0)
+    PrintFirstLine(desc, desclength, stream);
+  else
+    PrintOptionLine(desc, desclength, stream);
+}
+
 void ConfigParserArgv::PrintOptionHelp(
     Option* option, ostream* stream) const {
   if (option->GetShortName()) {
@@ -176,14 +228,15 @@ void ConfigParserArgv::PrintOptionHelp(
     (*stream) << "--" << setw(option_spacing_) << option->GetLongName();
   else
     (*stream) << "  " << setw(option_spacing_) << " ";
+  (*stream) << " ";
 
-  (*stream) << " " << option->GetDescription();
-  (*stream).flush();
+  PrintOptionDescription(option, stream);
 
   if (option->GetType())
     (*stream) << " (" << option->GetType() << ")" << endl;
   else
     (*stream) << endl;
+  (*stream).flush();
 }
 
 void ConfigParserArgv::PrintHelp(ostream* stream) const {
@@ -233,6 +286,14 @@ void ConfigParserArgv::DumpConfigs(int flags, ostream* stream) const {
       (*stream) << "-" << it->first << endl;
     }
   }
+}
+
+void ConfigParserArgv::SetOptionSpacing(int spacing) {
+  option_spacing_ = spacing;
+}
+
+void ConfigParserArgv::SetLineLength(int length) {
+  line_length_ = length;
 }
 
 bool ConfigParserArgv::ShouldExit() const {
