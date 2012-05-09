@@ -45,16 +45,15 @@ using namespace std::tr1;
 # include <functional>
 # include <unordered_map>
 # include <unordered_set>
-# define FUNCTOR_HASH(code) namespace std { code }
 #else
 # include <tr1/functional>
 # include <tr1/unordered_map>
 # include <tr1/unordered_set>
-# define FUNCTOR_HASH(code) namespace std { namespace tr1 { code } }
 #endif
-#define FUNCTOR_EQ(code) namespace std { code }
 
-#define BIT(bit) (1<<(bit))
+#ifndef BIT
+# define BIT(bit) (1<<(bit))
+#endif
 
 // This is roughly equivalent to strnlen on GNU systems.
 static inline int strmaxlen(const char* str, int len) {

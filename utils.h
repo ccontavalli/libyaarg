@@ -43,56 +43,9 @@ struct CStringCmpFunctor {
   }
 };
 
-template<typename MAP>
-typename MAP::value_type::second_type
-StlMapGet(const MAP& map, const typename MAP::key_type& key) {
-  typename MAP::const_iterator it(map.find(key));
-  if (it == map.end())
-    return NULL;
-  return it->second;
-}
-
 template<typename SET>
 bool StlSetInsert(SET* set, const typename SET::value_type& value) {
   return set->insert(value).second;
 }
-
-template<typename SET>
-bool StlSetHas(const SET& set, const typename SET::key_type& key) {
-  typename SET::const_iterator it(set.find(key));
-  if (it == set.end())
-    return false;
-  return true;
-}
-
-template<typename HOLDER>
-inline void StlDeleteElements(HOLDER* holder) {
-  for (typename HOLDER::iterator it(holder->begin());
-       it != holder->end(); ++it) {
-    delete *it;
-  }
-}
-
-template<typename HOLDER>
-class StlAutoDeleteElements {
- public:
-  explicit StlAutoDeleteElements(HOLDER* holder)
-     : holder_(holder) {
-  }
-
-  ~StlAutoDeleteElements() {
-    StlDeleteElements(holder_);
-  }
-
- private:
-  HOLDER* holder_;
-};
-
-// FIXME: this is ugly.
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-# define AUTO_DELETE_ELEMENTS(holder) StlAutoDeleteElements<decltype(holder)> __auto_delete_##holder(&(holder))
-#else
-# define AUTO_DELETE_ELEMENTS(holder) StlAutoDeleteElements<typeof(holder)> __auto_delete_##holder(&(holder))
-#endif
 
 #endif /* UTILS_H */
