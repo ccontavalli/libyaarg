@@ -55,15 +55,22 @@ class ConfigParserArgv : public ConfigParser {
  private:
   void PrintOptionDescription(Option* option, ostream* stream) const;
   void PrintOptionHelp(Option* option, ostream* stream) const;
+  void PrintCommandHelp(Command* command, ostream* stream) const;
   void PrintOptionLine(const char* line, int length, ostream* stream) const;
   void PrintFirstLine(const char* line, int length, ostream* stream) const;
 
+  void PrintHelp(
+      const char* name, const CommandHolder*, ostream* stream) const;
+  void DumpConfigs(
+      const char* name, const CommandHolder* holder, int flags,
+      ostream* stream) const;
+
   void ParseOption(
-      const char* argument, deque<const char*>* argv);
+      CommandHolder* holder, const char* argument, deque<const char*>* argv);
   void ParseLongOption(
-      const char* argument, deque<const char*>* argv);
+      CommandHolder* holder, const char* argument, deque<const char*>* argv);
   void ParseShortOption(
-      const char* argument, deque<const char*>* argv);
+      CommandHolder* holder, const char* argument, deque<const char*>* argv);
 
   void RunOptionParser(
     const char* name, Option* option, const char* argument,

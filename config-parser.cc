@@ -28,6 +28,12 @@
 
 #include "config-parser.h"
 
+CommandHolder::CommandHolder() : name_("main"), found_command_(NULL) {
+}
+
+CommandHolder::CommandHolder(const char* name) : name_(name), found_command_(NULL) {
+}
+
 void CommandHolder::RegisterOptionByLongName(const char* name, Option* option) {
   // FIXME: detect duplicate options and be angry.
   long_options_[name] = option;
@@ -53,6 +59,14 @@ bool CommandHolder::HasMessages() const {
 
 void CommandHolder::FlushMessages() {
   messages_.clear();
+}
+
+void CommandHolder::SetFoundCommand(Command* command) {
+  found_command_ = command;
+}
+
+Command* CommandHolder::GetFoundCommand() const {
+  return found_command_;
 }
 
 bool CommandHolder::PrintMessages(ostream* estr) const {
@@ -136,7 +150,7 @@ Option::Option(
 Command::Command(
     CommandHolder* holder, int flags, const char* name,
     const char* description)
-    : holder_(holder), name_(name_), description_(description) {
+    : CommandHolder(name), holder_(holder), description_(description) {
   if (holder)
     holder->RegisterCommand(name, this);
 }

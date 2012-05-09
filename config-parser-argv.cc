@@ -61,7 +61,8 @@ void ConfigParserArgv::RunOptionParser(
 }
 
 void ConfigParserArgv::ParseLongOption(
-    const char* argument, deque<const char*>* arguments) {
+    CommandHolder* holder, const char* argument,
+    deque<const char*>* arguments) {
   const char* equal = strchr(argument, '=');
   const char* value = NULL;
 
@@ -70,16 +71,16 @@ void ConfigParserArgv::ParseLongOption(
   // If we have an equal sign...
   if (equal) {
     option.append(argument, equal - argument);
-    it = long_options_.find(option.c_str() + 2);
+    it = holder->GetLongOptions().find(option.c_str() + 2);
 
     // Value follows the equal sign.
     value = equal + 1;
   } else {
     option.append(argument);
-    it = long_options_.find(argument);
+    it = holder->GetLongOptions().find(argument);
   }
 
-  if (it == long_options_.end()) {
+  if (it == holder->GetLongOptions().end()) {
     string error("unknown option: ");
     error.append(option);
     AddError(error);
@@ -90,13 +91,14 @@ void ConfigParserArgv::ParseLongOption(
 }
 
 void ConfigParserArgv::ParseShortOption(
-    const char* argument, deque<const char*>* arguments) {
+    CommandHolder* holder, const char* argument,
+    deque<const char*>* arguments) {
   static deque<const char*> empty;
   char short_option[] = "-\0\0";
   for (const char* cursor = argument; *cursor; cursor++) {
     short_option[1] = *cursor;
-    OptionMap::const_iterator it(short_options_.find(short_option + 1));
-    if (it == short_options_.end()) {
+    OptionMap::const_iterator it(holder->GetShortOptions().find(short_option + 1));
+    if (it == holder->GetShortOptions().end()) {
       string error("unknown option: -");
       error.append(short_option);
       AddError(error);
@@ -112,7 +114,8 @@ void ConfigParserArgv::ParseShortOption(
 }
 
 void ConfigParserArgv::ParseOption(
-    const char* argument, deque<const char*>* arguments) {
+    CommandHolder* holder, const char* argument,
+    deque<const char*>* arguments) {
   if (*argument != '-') {
     string error("internal error: ");
     error.append(argument);
@@ -122,20 +125,33 @@ void ConfigParserArgv::ParseOption(
   }
 
   if (*(argument+1) == '-')
-    ParseLongOption(argument + 2, arguments);
+    ParseLongOption(holder, argument + 2, arguments);
   else
-    ParseShortOption(argument + 1, arguments);
+    ParseShortOption(holder, argument + 1, arguments);
 }
 
 void ConfigParserArgv::Parse(int argc, const char** argv) {
   deque<const char*> arguments(argv + 1, argv + argc);
   deque<const char*> left;
 
+  CommandHolder* holder = this;
   while (!arguments.empty()) {
     const char* argument(arguments.front());
     arguments.pop_front();
 
     if (*argument != '-') {
+      // TODO: add support for longest prefix match? if we had a default
+      // handler for unknown options, eg, leftover files, we could let
+      // the users implement whatever logic they want for command execution.
+      // I suspect this would generally make the code more complex, more
+      // difficult to understand, and for no good reason.
+      CommandMap::const_iterator it = holder->GetCommands().find(argument);
+      if (it != holder->GetCommands().end()) {
+        holder->SetFoundCommand(it->second);
+        holder = it->second;
+        continue;
+      }
+
       left.push_back(argument);
       continue;
     }
@@ -145,7 +161,7 @@ void ConfigParserArgv::Parse(int argc, const char** argv) {
       break;
     }
 
-    ParseOption(argument, &arguments);
+    ParseOption(holder, argument, &arguments);
   }
 
   for (deque<const char*>::const_iterator it = left.begin();
@@ -211,6 +227,12 @@ void ConfigParserArgv::PrintOptionDescription(
     PrintOptionLine(desc, desclength, stream);
 }
 
+void ConfigParserArgv::PrintCommandHelp(
+    Command* command, ostream* stream) const {
+  (*stream) << "    " << setw(option_spacing_ + 2) << command->GetName()
+            << " " << command->GetDescription() << endl;
+}
+
 void ConfigParserArgv::PrintOptionHelp(
     Option* option, ostream* stream) const {
   if (option->GetShortName()) {
@@ -240,51 +262,83 @@ void ConfigParserArgv::PrintOptionHelp(
 }
 
 void ConfigParserArgv::PrintHelp(ostream* stream) const {
+  (*stream) << GetDescription() << endl;
+  PrintHelp("main", this, stream);
+}
+
+void ConfigParserArgv::PrintHelp(
+    const char* name, const CommandHolder* holder, ostream* stream) const {
   unordered_set<Option*> already_seen;
 
-  (*stream) << GetDescription() << endl;
-  for (OptionMap::const_iterator it = long_options_.begin();
-       it != long_options_.end(); ++it) {
-    if (!StlSetInsert(&already_seen, it->second))
-      continue;
-    PrintOptionHelp(it->second, stream);
+  if (!holder->GetLongOptions().empty() || !holder->GetShortOptions().empty()) {
+    (*stream) << endl << "=== " << name << " options:" << endl;
+    for (OptionMap::const_iterator it = holder->GetLongOptions().begin();
+         it != holder->GetLongOptions().end(); ++it) {
+      if (!StlSetInsert(&already_seen, it->second))
+        continue;
+      PrintOptionHelp(it->second, stream);
+    }
+
+    for (OptionMap::const_iterator it = holder->GetShortOptions().begin();
+         it != holder->GetShortOptions().end(); ++it) {
+      if (!StlSetInsert(&already_seen, it->second))
+        continue;
+      PrintOptionHelp(it->second, stream);
+    }
   }
 
-  for (OptionMap::const_iterator it = short_options_.begin();
-       it != short_options_.end(); ++it) {
-    if (!StlSetInsert(&already_seen, it->second))
-      continue;
-    PrintOptionHelp(it->second, stream);
+  if (!holder->GetCommands().empty()) {
+    (*stream) << endl << "=== " << name << " commands:" << endl;
+    for (CommandMap::const_iterator it = holder->GetCommands().begin();
+         it != holder->GetCommands().end(); ++it) {
+      PrintCommandHelp(it->second, stream);
+    }
+
+    for (CommandMap::const_iterator it = holder->GetCommands().begin();
+         it != holder->GetCommands().end(); ++it) {
+      PrintHelp(it->first, it->second, stream);
+    }
   }
 }
 
 void ConfigParserArgv::DumpConfigs(int flags, ostream* stream) const {
+  DumpConfigs("main", this, flags, stream);
+}
+
+void ConfigParserArgv::DumpConfigs(
+    const char* name, const CommandHolder* holder, int flags, ostream* stream) const {
   unordered_set<Option*> already_dumped;
 
-  for (OptionMap::const_iterator it = long_options_.begin();
-       it != long_options_.end(); ++it) {
+  (*stream) << "options passed to " << name << ":" << endl;
+  for (OptionMap::const_iterator it = holder->GetLongOptions().begin();
+       it != holder->GetLongOptions().end(); ++it) {
     if (!StlSetInsert(&already_dumped, it->second))
       continue;
 
     string value;
     if (it->second->GetAsString(&value)) {
-      (*stream) << "--" << it->first << "=" << value << endl;
+      (*stream) << "  --" << it->first << "=" << value << endl;
     } else {
-      (*stream) << "--" << it->first << endl;
+      (*stream) << "  --" << it->first << endl;
     }
   }
 
-  for (OptionMap::const_iterator it = short_options_.begin();
-       it != short_options_.end(); ++it) {
+  for (OptionMap::const_iterator it = holder->GetShortOptions().begin();
+       it != holder->GetShortOptions().end(); ++it) {
     if (!StlSetInsert(&already_dumped, it->second))
       continue;
 
     string value;
     if (it->second->GetAsString(&value)) {
-      (*stream) << "-" << it->first << " " << value << endl;
+      (*stream) << "  -" << it->first << " " << value << endl;
     } else {
-      (*stream) << "-" << it->first << endl;
+      (*stream) << "  -" << it->first << endl;
     }
+  }
+
+  for (CommandMap::const_iterator it = holder->GetCommands().begin();
+       it != holder->GetCommands().end(); ++it) {
+    DumpConfigs(it->first, it->second, flags, stream);
   }
 }
 

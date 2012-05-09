@@ -61,6 +61,13 @@ class CommandHolder {
     APIAllowsDuplicateCommands = BIT(4)
   };
 
+  CommandHolder();
+  explicit CommandHolder(const char* name);
+
+  virtual ~CommandHolder() {}
+
+  const char* GetName() const { return name_; }
+
   void RegisterOptionByLongName(const char* name, Option* option);
   void RegisterOptionByShortName(const char* name, Option* option);
 
@@ -77,20 +84,39 @@ class CommandHolder {
   bool GetMessages(string* output) const;
   void FlushMessages();
 
+  // Each command holder will eventually have one of the commands run.
+  // SetFoundCommand and GetFoundCommand allow to access those commands.
+  void SetFoundCommand(Command* command);
+  Command* GetFoundCommand() const;
+
   virtual const ConfigParser* GetParser() const = 0;
+
+  typedef map<const char*, Command*, CStringCmpFunctor> CommandMap;
+  typedef map<const char*, Option*, CStringCmpFunctor> OptionMap;
+
+  // Each config parser has its own way to display options and commands.
+  // For example, an argv parser can display options with -- and -, a
+  // config file parser might generate a man page. Either we standardize
+  // on a way so each command holder can call methods and functions to
+  // create arbitrary help screens, or code to generate help screens
+  // needs access to all the commands and options a holder knows about.
+  // We decided to go this route here.
+  const CommandMap& GetCommands() const { return commands_; }
+  const OptionMap& GetShortOptions() const { return short_options_; }
+  const OptionMap& GetLongOptions() const { return long_options_; }
 
  protected:
   void AddError(const string& error);
   void AddMessage(const string& message);
 
-  typedef map<const char*, Command*, CStringCmpFunctor> CommandMap;
-  typedef map<const char*, Option*, CStringCmpFunctor> OptionMap;
+ private:
+  const char* name_;
+  Command* found_command_;
 
   CommandMap commands_;
   OptionMap short_options_;
   OptionMap long_options_;
 
- private:
   list<string> errors_;
   list<string> messages_;
 };
@@ -100,13 +126,11 @@ class Command : public CommandHolder {
   Command(CommandHolder* holder, int flags,
 	  const char* name, const char* description);
 
-  const char* GetName() { return name_; }
+  const char* GetDescription() { return description_; }
   const ConfigParser* GetParser() const { return holder_->GetParser(); }
 
  private:
   CommandHolder* holder_;
-
-  const char* name_;
   const char* description_;
 };
 
