@@ -26,8 +26,8 @@
 // those of the authors and should not be interpreted as representing official
 // policies, either expressed or implied, of Carlo Contavalli.
 
-#ifndef CONFIG_PARSER_ARGV_H
-# define CONFIG_PARSER_ARGV_H
+#ifndef LIBYAARG_CONFIG_PARSER_ARGV_H
+# define LIBYAARG_CONFIG_PARSER_ARGV_H
 
 # include "config-parser.h"
 # include "config-parser-options.h"
@@ -85,4 +85,4 @@ class ConfigParserArgv : public ConfigParser {
   bool should_continue_;
 };
 
-#endif /* CONFIG_PARSER_ARGV_H */
+#endif /* LIBYAARG_CONFIG_PARSER_ARGV_H */

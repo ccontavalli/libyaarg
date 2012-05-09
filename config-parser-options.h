@@ -26,8 +26,8 @@
 // those of the authors and should not be interpreted as representing official
 // policies, either expressed or implied, of Carlo Contavalli.
 
-#ifndef CONFIG_PARSER_OPTIONS_H
-# define CONFIG_PARSER_OPTIONS_H
+#ifndef LIBYAARG_CONFIG_PARSER_OPTIONS_H
+# define LIBYAARG_CONFIG_PARSER_OPTIONS_H
 
 # include "config-parser.h"
 # include <vector>
@@ -162,4 +162,4 @@ class StandardOptions {
   HelpOption help_;
 };
 
-#endif /* CONFIG_PARSER_OPTIONS_H */
+#endif /* LIBYAARG_CONFIG_PARSER_OPTIONS_H */

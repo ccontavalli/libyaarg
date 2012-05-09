@@ -26,8 +26,8 @@
 // those of the authors and should not be interpreted as representing official
 // policies, either expressed or implied, of Carlo Contavalli.
 
-#ifndef BASE_H
-# define BASE_H
+#ifndef LIBYAARG_BASE_H
+# define LIBYAARG_BASE_H
 
 # include <stdint.h>
 
@@ -62,4 +62,4 @@ static inline int strmaxlen(const char* str, int len) {
     ;
   return end - str;
 }
-#endif /* BASE_H */
+#endif /* LIBYAARG_BASE_H */

@@ -26,8 +26,8 @@
 // those of the authors and should not be interpreted as representing official
 // policies, either expressed or implied, of Carlo Contavalli.
 
-#ifndef UTILS_H
-# define UTILS_H
+#ifndef LIBYAARG_UTILS_H
+# define LIBYAARG_UTILS_H
 
 # include "base.h"
 # include <string.h>
@@ -48,4 +48,4 @@ bool StlSetInsert(SET* set, const typename SET::value_type& value) {
   return set->insert(value).second;
 }
 
-#endif /* UTILS_H */
+#endif /* LIBYAARG_UTILS_H */
