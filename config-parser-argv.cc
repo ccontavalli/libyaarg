@@ -351,6 +351,6 @@ void ConfigParserArgv::SetLineLength(int length) {
 }
 
 bool ConfigParserArgv::ShouldExit() const {
-  return !should_continue_;
+  return ConfigParser::ShouldExit() || !should_continue_;
 }
 

@@ -28,37 +28,58 @@
 
 #include "config-parser.h"
 
-CommandHolder::CommandHolder() : name_("main"), found_command_(NULL) {
+CommandHolder::CommandHolder(int flags)
+    : name_("main"), flags_(flags), found_command_(NULL) {
 }
 
-CommandHolder::CommandHolder(const char* name) : name_(name), found_command_(NULL) {
+CommandHolder::CommandHolder(const char* name, int flags)
+    : name_(name), flags_(flags), found_command_(NULL) {
 }
 
-void CommandHolder::RegisterOptionByLongName(const char* name, Option* option) {
-  // FIXME: detect duplicate options and be angry.
-  long_options_[name] = option;
+bool CommandHolder::RegisterOptionByLongName(const char* name, Option* option) {
+  if (long_options_.insert(make_pair(name, option)).second)
+    return true;
+
+  if (!(flags_ & APIAllowsDuplicateOptions)) {
+    string error("SOFTWARE BUG: long option '");
+    error.append(name);
+    error.append("' was already registered, duplicate.");
+    AddError(error);
+  }
+
+  return false;
 }
 
-void CommandHolder::RegisterOptionByShortName(const char* name, Option* option) {
-  // FIXME: detect duplicate options and be angry.
-  short_options_[name] = option;
+bool CommandHolder::RegisterOptionByShortName(const char* name, Option* option) {
+  if (short_options_.insert(make_pair(name, option)).second)
+    return true;
+
+  if (!(flags_ & APIAllowsDuplicateOptions)) {
+    string error("SOFTWARE BUG: short option '");
+    error.append(name);
+    error.append("' was already registered, duplicate.");
+    AddError(error);
+  }
+
+  return false;
 }
 
-void CommandHolder::RegisterCommand(const char* name, Command* command) {
-  // FIXME: detect duplicate options and be angry.
-  commands_[name] = command;
+bool CommandHolder::RegisterCommand(const char* name, Command* command) {
+  if (commands_.insert(make_pair(name, command)).second)
+    return true;
+
+  if (!(flags_ & APIAllowsDuplicateCommands)) {
+    string error("SOFTWARE BUG: command '");
+    error.append(name);
+    error.append("' was already registered, duplicate.");
+    AddError(error);
+  }
+
+  return false;
 }
 
 void CommandHolder::AddMessage(const string& message) {
-  messages_.push_back(message);
-}
-
-bool CommandHolder::HasMessages() const {
-  return !messages_.empty();
-}
-
-void CommandHolder::FlushMessages() {
-  messages_.clear();
+  GetParser()->AddMessage(message);
 }
 
 void CommandHolder::SetFoundCommand(Command* command) {
@@ -69,70 +90,91 @@ Command* CommandHolder::GetFoundCommand() const {
   return found_command_;
 }
 
-bool CommandHolder::PrintMessages(ostream* estr) const {
-  if (!HasMessages())
-    return false;
-
-  for (list<string>::const_iterator it = messages_.begin();
-       it != messages_.end(); ++it) {
-    (*estr) << *it << '\n';
-  }
-
-  return true;
+void Command::AddError(const string& error) {
+  GetParser()->AddError(error);
 }
 
-bool CommandHolder::GetMessages(string* output) const {
-  if (!HasMessages())
-    return false;
-
-  for (list<string>::const_iterator it = messages_.begin();
-       it != messages_.end(); ++it) {
-    output->append(*it);
-    output->append("\n");
-  }
-
-  return true;
-}
-
-void CommandHolder::AddError(const string& error) {
-  errors_.push_back(error);
-}
-
-bool CommandHolder::HasErrors() const {
-  return !errors_.empty();
-}
-
-void CommandHolder::FlushErrors() {
-  errors_.clear();
-}
-
-bool CommandHolder::PrintErrors(ostream* estr) const {
-  if (!HasErrors())
-    return false;
-
-  for (list<string>::const_iterator it = errors_.begin();
-       it != errors_.end(); ++it) {
-    (*estr) << *it << '\n';
-  }
-
-  return true;
-}
-
-bool CommandHolder::GetErrors(string* output) const {
-  if (!HasErrors())
-    return false;
-
-  for (list<string>::const_iterator it = errors_.begin();
-       it != errors_.end(); ++it) {
-    output->append(*it);
-    output->append("\n");
-  }
-
-  return true;
+void Command::AddMessage(const string& error) {
+  GetParser()->AddMessage(error);
 }
 
 ConfigParser::ConfigParser(int flags, const char* description)
     : description_(description) {
+}
+
+bool ConfigParser::HasErrors() const {
+  bool retval = !errors_.empty();
+  return retval;
+}
+
+bool ConfigParser::HasMessages() const {
+  return !messages_.empty();
+}
+
+bool ConfigParser::PrintErrors(ostream* estr) const {
+  if (!HasErrors())
+    return false;
+
+  for (list<string>::const_iterator it = errors_.begin();
+       it != errors_.end(); ++it) {
+    (*estr) << *it << '\n';
+  }
+
+  return true;
+}
+
+bool ConfigParser::GetErrors(string* output) const {
+  if (!HasErrors())
+    return false;
+
+  for (list<string>::const_iterator it = errors_.begin();
+       it != errors_.end(); ++it) {
+    output->append(*it);
+    output->append("\n");
+  }
+
+  return true;
+}
+
+void ConfigParser::FlushErrors() {
+  errors_.clear();
+}
+
+bool ConfigParser::PrintMessages(ostream* estr) const {
+  if (!HasMessages())
+    return false;
+
+  for (list<string>::const_iterator it = messages_.begin();
+       it != messages_.end(); ++it) {
+    (*estr) << *it << '\n';
+  }
+
+  return true;
+}
+
+bool ConfigParser::GetMessages(string* output) const {
+  if (!HasMessages())
+    return false;
+
+  for (list<string>::const_iterator it = messages_.begin();
+       it != messages_.end(); ++it) {
+    output->append(*it);
+    output->append("\n");
+  }
+
+  return true;
+}
+
+void ConfigParser::FlushMessages() {
+  messages_.clear();
+}
+
+void ConfigParser::AddError(const string& error) {
+  errors_.push_back(error);
+}
+
+void ConfigParser::AddMessage(const string& error) {
+  messages_.push_back(error);
 }
 
 Option::Option(
