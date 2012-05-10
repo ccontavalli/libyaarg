@@ -34,7 +34,7 @@ DYNAMIC_LINK_FLAGS = -shared -Wl,-soname,libyaarg.so.0
 
 ALLSOURCES = *.cc
 LDFLAGS = -lstdc++ -ggdb3 #-lduma -lm
-CPPFLAGS = -Wall -pedantic -ggdb3 -O0 -DPRINT_DEBUG -Wformat-nonliteral -Wextra -Wstrict-overflow=5 -Wfloat-equal -Wconversion -Wlogical-op -fstack-protector-all -Wno-unused-parameter -fno-exceptions -std=c++0x
+CPPFLAGS = -Wall -pedantic -ggdb3 -O0 -DPRINT_DEBUG -Wformat-nonliteral -Wextra -Wstrict-overflow=5 -Wfloat-equal -Wconversion -Wlogical-op -fstack-protector-all -Wno-unused-parameter -fno-exceptions -std=c++98
 # CPPFLAGS = -Wall -pedantic -O0 -DPRINT_DEBUG
 # -Wunreachable-code -> causes lot of warnings due to standard libraries!
 # -Wformat-zero-length -> C and objective C only.
