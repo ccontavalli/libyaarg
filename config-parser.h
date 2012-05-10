@@ -73,10 +73,15 @@ class CommandHolder {
   bool RegisterOptionByShortName(const char* name, Option* option);
   bool RegisterCommand(const char* name, Command* command);
 
-  // Each command holder will eventually have one of the commands run.
-  // SetFoundCommand and GetFoundCommand allow to access those commands.
+  // Users can specify commands to run. Each command holder will eventually
+  // have one command. SetFoundCommand and GetFoundCommand allow to access
+  // those commands, recursively.
   void SetFoundCommand(Command* command);
   Command* GetFoundCommand() const;
+
+  // Each command can implement a Run method by using inheritance.
+  // RunCommands() will invoke those run methods for you.
+  void RunCommands();
 
   virtual ConfigParser* GetParser() = 0;
 
@@ -116,6 +121,8 @@ class Command : public CommandHolder {
 
   const char* GetDescription() { return description_; }
   virtual ConfigParser* GetParser() { return holder_->GetParser(); }
+
+  virtual void Run() {}
 
  protected:
   virtual void AddError(const string& error);

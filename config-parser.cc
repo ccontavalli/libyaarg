@@ -90,6 +90,14 @@ Command* CommandHolder::GetFoundCommand() const {
   return found_command_;
 }
 
+void CommandHolder::RunCommands() {
+  Command* command = found_command_;
+  while (command) {
+    command->Run();
+    command = command->GetFoundCommand();
+  }
+}
+
 void Command::AddError(const string& error) {
   GetParser()->AddError(error);
 }
