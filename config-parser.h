@@ -216,6 +216,8 @@ class Option {
   // the default, it's been passed from the command line.
   virtual bool GetAsString(string* value) const = 0;
 
+  void AddTo(CommandHolder* holder);
+
  private:
   const char* long_name_;
   const char* short_name_;

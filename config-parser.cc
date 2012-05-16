@@ -189,12 +189,17 @@ Option::Option(
     CommandHolder* parser, int flags, const char* lname,
     const char* sname, const char* description)
     : long_name_(lname), short_name_(sname), description_(description) {
-  if (!parser)
+  AddTo(parser);
+}
+
+void Option::AddTo(CommandHolder* holder) {
+  if (!holder)
     return;
 
-  parser->RegisterOptionByLongName(lname, this);
-  if (sname)
-    parser->RegisterOptionByShortName(sname, this);
+  if (long_name_)
+    holder->RegisterOptionByLongName(long_name_, this);
+  if (short_name_)
+    holder->RegisterOptionByShortName(short_name_, this);
 }
 
 Command::Command(
