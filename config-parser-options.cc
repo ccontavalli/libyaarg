@@ -28,6 +28,8 @@
 
 #include "config-parser-options.h"
 
+#include <string.h>
+
 ActionOption::ActionOption(
     CommandHolder* holder, int flags, const char* lname, const char* sname,
     const char* description)
@@ -146,4 +148,43 @@ const char* OneOfOption::GetType() const {
   }
 
   return value_.c_str();
+}
+
+bool BoolOption::GetAsString(string* value) const {
+  if (!value)
+    return true;
+
+  if (Get())
+    value->assign("true");
+  else
+    value->assign("false");
+
+  return true;
+}
+
+bool BoolOption::Parse(const char* value, deque<const char*>* argv,
+			ostream* error, ostream* output) {
+  if (!value && argv->empty()) {
+    (*error) << "option requires " << GetType() << " as a value";
+    return false;
+  }
+ 
+  if (!value) {
+    value = (*argv)[0];
+    argv->pop_front();
+  }
+
+  if (!strcasecmp(value, "true")) {
+    Set(true);
+    return true;
+  }
+
+  if (!strcasecmp(value, "false")) {
+    Set(false);
+    return true;
+  }
+
+  // If we get here, it means that we didn't find a valid value.
+  (*error) << "\"" << value << "\" is invalid, must be one of " << GetType();
+  return false;
 }

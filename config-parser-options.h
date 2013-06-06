@@ -150,6 +150,49 @@ class BoolOption : public TypedOption<bool> {
              ostream* error, ostream* output);
 };
 
+template<typename IntTypeT>
+class IntOption : public TypedOption<IntTypeT> {
+ public:
+  IntOption(
+    CommandHolder* holder, int flags, const char* lname, const char* sname,
+    IntTypeT fallback, const char* description)
+    : TypedOption<IntTypeT>(
+        holder, flags, lname, sname, "integer", fallback, description) {}
+ 
+  bool GetAsString(string* value) const {
+    if (!value)
+      return true;
+  
+    if (this->Get())
+      value->assign("true");
+    else
+      value->assign("false");
+  
+    return true;
+  }
+
+  bool Parse(const char* value, deque<const char*>* argv,
+             ostream* error, ostream* output) {
+    if (!value && argv->empty()) {
+      (*error) << "option requires " << this->GetType() << " as a value";
+      return false;
+    }
+   
+    if (!value) {
+      value = (*argv)[0];
+      argv->pop_front();
+    }
+  
+    IntTypeT number;
+    if (istringstream(value) >> number)
+      return true;
+  
+    // If we get here, it means that we didn't find a valid value.
+    (*error) << "\"" << value << "\" is invalid, must be one of " << this->GetType();
+    return false;
+  }
+};
+
 class StandardOptions {
  public:
   StandardOptions(CommandHolder* holder)
