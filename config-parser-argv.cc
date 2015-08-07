@@ -177,12 +177,12 @@ void ConfigParserArgv::GetHelp(string* str) const {
 }
 
 void ConfigParserArgv::PrintFirstLine(
-    const char* line, int length, ostream* stream) const {
+    const char* line, size_t length, ostream* stream) const {
   stream->write(line, length);
 }
 
 void ConfigParserArgv::PrintOptionLine(
-    const char* line, int length, ostream* stream) const {
+    const char* line, size_t length, ostream* stream) const {
   (*stream) << endl;
   (*stream) << "      " << setw(option_spacing_) << " ";
   (*stream) << " ";
@@ -191,9 +191,9 @@ void ConfigParserArgv::PrintOptionLine(
 
 void ConfigParserArgv::PrintOptionDescription(
     Option* option, ostream* stream) const {
-  int maxlength = line_length_ - (option_spacing_ + 4 + 1);
+  size_t maxlength = line_length_ - (option_spacing_ + 4 + 1);
   const char* desc = option->GetDescription();
-  int desclength = strlen(desc);
+  size_t desclength = strlen(desc);
 
   int i = 0;
   for (; desclength > maxlength; ++i) {

@@ -56,8 +56,8 @@ class ConfigParserArgv : public ConfigParser {
   void PrintOptionDescription(Option* option, ostream* stream) const;
   void PrintOptionHelp(Option* option, ostream* stream) const;
   void PrintCommandHelp(Command* command, ostream* stream) const;
-  void PrintOptionLine(const char* line, int length, ostream* stream) const;
-  void PrintFirstLine(const char* line, int length, ostream* stream) const;
+  void PrintOptionLine(const char* line, size_t length, ostream* stream) const;
+  void PrintFirstLine(const char* line, size_t length, ostream* stream) const;
 
   void PrintHelp(
       const char* name, const CommandHolder*, ostream* stream) const;

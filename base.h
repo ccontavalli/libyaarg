@@ -56,7 +56,7 @@ using namespace std::tr1;
 #endif
 
 // This is roughly equivalent to strnlen on GNU systems.
-static inline int strmaxlen(const char* str, int len) {
+static inline long int strmaxlen(const char* str, int len) {
   const char* end = str + len;
   for (; *str && str < end; ++str)
     ;
