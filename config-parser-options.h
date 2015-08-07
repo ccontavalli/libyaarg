@@ -32,6 +32,21 @@
 # include "config-parser.h"
 # include <vector>
 
+class CallbackCommand : public Command {
+ public:
+  typedef function<void ()> callback_t;
+  CallbackCommand(
+      CommandHolder* holder, int flags, const char* name,
+      const char* description, callback_t callback)
+      : Command(holder, flags, name, description),
+        callback_(callback) {}
+
+  void Run() { callback_(); }
+
+ private:
+  callback_t callback_;
+};
+
 class ActionOption : public Option {
  public:
   ActionOption(
