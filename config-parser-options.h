@@ -54,7 +54,7 @@ class ActionOption : public Option {
     const char* description);
 
   const char* GetType() const { return NULL; }
-  bool GetAsString(string* value) const { return false; }
+  bool GetAsString(string* /* value */) const { return false; }
   bool HasBeenSet() const { return has_been_set_; }
   bool HasDefaultValue() const { return false; } 
 
