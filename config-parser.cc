@@ -50,6 +50,10 @@ bool CommandHolder::RegisterOptionByLongName(const char* name, Option* option) {
   return false;
 }
 
+void CommandHolder::RegisterLeftoverParser(Option* option) {
+  leftover_parsers_.push_back(option);
+}
+
 bool CommandHolder::RegisterOptionByShortName(const char* name, Option* option) {
   if (short_options_.insert(make_pair(name, option)).second)
     return true;
@@ -200,6 +204,8 @@ void Option::AddTo(CommandHolder* holder) {
     holder->RegisterOptionByLongName(long_name_, this);
   if (short_name_)
     holder->RegisterOptionByShortName(short_name_, this);
+  if (!long_name_ && !short_name_)
+    holder->RegisterLeftoverParser(this);
 }
 
 Command::Command(

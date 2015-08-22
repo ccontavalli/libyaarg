@@ -72,6 +72,7 @@ class CommandHolder {
   bool RegisterOptionByLongName(const char* name, Option* option);
   bool RegisterOptionByShortName(const char* name, Option* option);
   bool RegisterCommand(const char* name, Command* command);
+  void RegisterLeftoverParser(Option* option);
 
   // Users can specify commands to run. Each command holder will eventually
   // have one command. SetFoundCommand and GetFoundCommand allow to access
@@ -87,6 +88,7 @@ class CommandHolder {
 
   typedef map<const char*, Command*, CStringCmpFunctor> CommandMap;
   typedef map<const char*, Option*, CStringCmpFunctor> OptionMap;
+  typedef list<Option*> LeftoverParsers;
 
   // Each config parser has its own way to display options and commands.
   // For example, an argv parser can display options with -- and -, a
@@ -98,6 +100,7 @@ class CommandHolder {
   const CommandMap& GetCommands() const { return commands_; }
   const OptionMap& GetShortOptions() const { return short_options_; }
   const OptionMap& GetLongOptions() const { return long_options_; }
+  const LeftoverParsers& GetLeftoverParsers() const { return leftover_parsers_; }
 
  protected:
   virtual void AddError(const string& error) = 0;
@@ -112,6 +115,8 @@ class CommandHolder {
   CommandMap commands_;
   OptionMap short_options_;
   OptionMap long_options_;
+
+  LeftoverParsers leftover_parsers_;
 };
 
 class Command : public CommandHolder {

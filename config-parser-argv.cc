@@ -164,6 +164,17 @@ void ConfigParserArgv::Parse(int argc, const char** argv) {
     ParseOption(holder, argument, &arguments);
   }
 
+  if (left.empty()) {
+    // FIXME: some arguments may be mandatory.
+    return;
+  }
+
+  const CommandHolder::LeftoverParsers& parsers = holder->GetLeftoverParsers();
+  for (CommandHolder::LeftoverParsers::const_iterator it = parsers.begin();
+       it != parsers.end(); ++it) {
+    RunOptionParser("", *it, NULL, &left); 
+  }  
+
   for (deque<const char*>::const_iterator it = left.begin();
        it != left.end(); ++it) {
     string message("unknown argument: ");
