@@ -32,6 +32,7 @@
 # include "config-parser.h"
 # include <vector>
 
+// Runs a callback whenver the specified command appears on the command line.
 class CallbackCommand : public Command {
  public:
   typedef function<void ()> callback_t;

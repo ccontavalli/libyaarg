@@ -1,4 +1,4 @@
-// Copyright (c) 2008,2009,2010,2011 Carlo Contavalli (ccontavalli@gmail.com).
+// Copyright (c) 2013 Carlo Contavalli (ccontavalli@gmail.com).
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,6 @@
 // those of the authors and should not be interpreted as representing official
 // policies, either expressed or implied, of Carlo Contavalli.
 
-#ifndef LIBYAARG_BASE_H
-# define LIBYAARG_BASE_H
+#include "config-parser-options11.h"
 
-# include <stdint.h>
 
-using namespace std;
-
-namespace std {
-namespace tr1 {
-}
-}
-using namespace std::tr1;
-
-// Helpers to deal with the c++0x transition, some things are in std or tr1
-// depending on compiler flags or version.
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) || defined(HAVE_CXX11)
-# include <functional>
-# include <unordered_map>
-# include <unordered_set>
-#else
-# include <tr1/functional>
-# include <tr1/unordered_map>
-# include <tr1/unordered_set>
-#endif
-
-#ifndef BIT
-# define BIT(bit) (1<<(bit))
-#endif
-
-// This is roughly equivalent to strnlen on GNU systems.
-static inline long int strmaxlen(const char* str, int len) {
-  const char* end = str + len;
-  for (; *str && str < end; ++str)
-    ;
-  return end - str;
-}
-#endif /* LIBYAARG_BASE_H */
