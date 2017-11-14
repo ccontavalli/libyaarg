@@ -164,14 +164,9 @@ void ConfigParserArgv::Parse(int argc, const char** argv) {
     ParseOption(holder, argument, &arguments);
   }
 
-  if (left.empty()) {
-    // FIXME: some arguments may be mandatory.
-    return;
-  }
-
   const CommandHolder::LeftoverParsers& parsers = holder->GetLeftoverParsers();
   for (CommandHolder::LeftoverParsers::const_iterator it = parsers.begin();
-       it != parsers.end(); ++it) {
+       it != parsers.end() && !left.empty(); ++it) {
     RunOptionParser("", *it, NULL, &left); 
   }  
 
