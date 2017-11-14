@@ -31,6 +31,7 @@
 
 # include "config-parser.h"
 # include <vector>
+# include <sstream>
 
 // Runs a callback whenver the specified command appears on the command line.
 class CallbackCommand : public Command {
@@ -179,16 +180,16 @@ class IntOption : public TypedOption<IntTypeT> {
     if (!value)
       return true;
   
-    if (this->Get())
-      value->assign("true");
-    else
-      value->assign("false");
-  
+    IntTypeT stored = this->Get();
+    ostringstream ss;
+    ss << stored;
+    value->assign(ss.str());
+
     return true;
   }
 
   bool Parse(const char* value, deque<const char*>* argv,
-             ostream* error, ostream* output) {
+             ostream* error, ostream* /* output */) {
     if (!value && argv->empty()) {
       (*error) << "option requires " << this->GetType() << " as a value";
       return false;
