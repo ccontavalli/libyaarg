@@ -184,7 +184,6 @@ class IntOption : public TypedOption<IntTypeT> {
     ostringstream ss;
     ss << stored;
     value->assign(ss.str());
-
     return true;
   }
 
