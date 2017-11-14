@@ -26,34 +26,12 @@ me if you have problems: <ccontavalli at inscatolati.net>.
 Why should I use libyaarg?
 ==========================
 
-Meh, don't use it if you don't want to, but here's a few principles that
-drove libyaarg design:
+libyaarg should be:
 
   o  simple to use
   o  simple to modify
   o  self contained, little to no dependenies
   o  designed to support modular programming
-
-But I gues this is no surprise. Find me a library whose design principles
-have been "hard to use", "hard to modify", and with "lots of dependencies",
-and I'll be happy to pay you a beer the first time I meet you in person.
-
-So, here's what this all means to me:
-
-  o  If I use a library, it has to save me time. Common use cases should
-     not require too much boilerplate, and should be trivial to understand
-     and use even without fully understanding how the library works.
-
-  o  I don't like libraries for which I can't easily and quickly
-     understand the code. If I need to fix a bug, I need to be able
-     to do so quickly. If I want an extra feature, it has to be
-     easy to add. Often, the efforts to make a library easy to use
-     turn to fancy constructs and magic C++ features, with the purpose
-     of adding syntactic sugar or expanding the flexibility of the
-     code. Over elegance of the constructs being used, cleanness of
-     the OO model, and fancy constructs, I prefer simpler constructs
-     that even if less flexible, allow anyone to easily understand and
-     fix the code.
 
 When I talk about "modular programming", I refer to the fact that much
 (most?) code written today is modular in design. OO programming has sold
